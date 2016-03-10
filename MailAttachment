@@ -1,0 +1,69 @@
+SendMailWithAttach.java
+---------------------
+package mailservlets;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Properties;
+
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+import javax.mail.*;
+import javax.mail.internet.*;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+/**
+ * Servlet implementation class SendMailServlet
+ */
+@WebServlet("/sendmail")
+public class SendMailWithAttach extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+   	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+   		response.setContentType("text/html");
+   		PrintWriter out = response.getWriter();
+   		String to = request.getParameter("toaddress");
+   		String from = request.getParameter("fromaddress");
+   		String subject = request.getParameter("subject");
+   		String body = request.getParameter("body");
+   		String filename = request.getParameter("filename");
+   		
+   		//out.println(to + "\t" + from  + "\t" + subject + "\t" + body);
+   		Properties props = System.getProperties();
+   		Session session = Session.getInstance(props, null);
+   		try{
+   			MimeMessage msg = new MimeMessage(session);
+   			msg.setFrom(new InternetAddress(from));
+   			msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
+   			msg.setSubject(subject);
+   			
+   			MimeBodyPart mbp1 = new MimeBodyPart();
+   			mbp1.setText(body);
+   			
+   			MimeBodyPart mbp2 = new MimeBodyPart();
+   			FileDataSource fds = new FileDataSource(getServletContext().getRealPath(filename));
+   			mbp2.setDataHandler(new DataHandler(fds));
+   			mbp2.setFileName(fds.getName());
+   			
+   			Multipart mp = new MimeMultipart();
+   			mp.addBodyPart(mbp1);
+   			mp.addBodyPart(mbp2);
+   			msg.setContent(mp);
+   			
+   			
+   			Transport.send(msg);
+   			out.println("\n Mail was sent with attachment successfully...!!!");
+   		}
+   		catch(Exception e)
+   		{
+   			out.println(e);
+   		}
+	}
+
+}
