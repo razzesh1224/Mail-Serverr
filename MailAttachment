@@ -52,7 +52,7 @@ public class SendMailWithAttach extends HttpServlet {
    			mbp2.setFileName(fds.getName());
    			
    			Multipart mp = new MimeMultipart();
-   			mp.addBodyPart(mbp1);
+   			mp.addBodyPart(mbp1); //addBodyPart(BodyPart) is not applicable to addBodyPart(MimeBodyPart)
    			mp.addBodyPart(mbp2);
    			msg.setContent(mp);
    			
